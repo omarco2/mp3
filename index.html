@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#020617">
-<title>مشغل الصوت - Chrome</title>
+<title>مشغل الصوت</title>
 
 <!-- إعدادات PWA والتثبيت -->
 <link rel="manifest" id="manifestLink">
@@ -24,7 +24,7 @@ input[type=range]{width:100%;height:7px;appearance:none;background:#334155;borde
 .times{display:flex;justify-content:space-between;direction:ltr;color:#94a3b8;font-size:11px;margin-top:6px}
 .controls{display:flex;justify-content:center;align-items:center;gap:8px;margin:20px 0}.btn{border:0;color:#fff;background:#ffffff18;border-radius:50%;width:47px;height:47px;font-size:18px;cursor:pointer}.play{width:68px;height:68px;font-size:28px;background:linear-gradient(135deg,#06b6d4,#2563eb)}.track{display:flex;flex-direction:column;align-items:center;justify-content:center}.track small{font-size:8px}
 .volume{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-.actions{display:flex;flex-direction:column;gap:10px}.action{width:100%;min-height:58px;border:0;border-radius:16px;color:#fff;font-family:Tahoma,Arial;font-size:16px;font-weight:bold}.open{background:linear-gradient(135deg,#06b6d4,#2563eb)}.folder{background:linear-gradient(135deg,#7c3aed,#4f46e5)}.install{background:linear-gradient(135deg,#10b981,#059669);display:none;}
+.actions{display:flex;flex-direction:column;gap:10px}.action{width:100%;min-height:58px;border:0;border-radius:16px;color:#fff;font-family:Tahoma,Arial;font-size:16px;font-weight:bold;cursor:pointer}.open{background:linear-gradient(135deg,#06b6d4,#2563eb)}.folder{background:linear-gradient(135deg,#7c3aed,#4f46e5)}.install{background:linear-gradient(135deg,#10b981,#059669);display:block;}
 .selection{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 10px}.selection button{border:0;border-radius:11px;padding:10px;color:#fff;background:#ffffff14;font-family:Tahoma;font-size:12px;font-weight:bold}.selection button:last-of-type{background:#991b1b}.selected{font-size:11px;color:#94a3b8;display:flex;align-items:center}
 .list-title{display:flex;justify-content:space-between;margin:8px 0}.count{font-size:12px;color:#94a3b8}.playlist{max-height:300px;overflow:auto}.song{display:flex;align-items:center;gap:8px;min-height:62px;margin-bottom:7px;padding:8px 10px;background:#ffffff0f;border-radius:14px}.song.active{background:#0ea5e933}.check{width:20px;height:20px;accent-color:#22d3ee}.num{width:22px;text-align:center;color:#94a3b8;font-size:12px}.icon{width:42px;height:42px;border-radius:11px;background:#ffffff18;display:flex;align-items:center;justify-content:center}.songname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.empty{text-align:center;color:#64748b;padding:25px;font-size:13px}
 .hidden{position:fixed;left:-10000px;width:1px;height:1px;opacity:0}
@@ -73,7 +73,7 @@ input[type=range]{width:100%;height:7px;appearance:none;background:#334155;borde
 const manifestData = {
   name: "مشغل الصوت",
   short_name: "مشغل الصوت",
-  start_url: ".",
+  start_url: "./",
   display: "standalone",
   background_color: "#020617",
   theme_color: "#020617",
@@ -99,17 +99,28 @@ if ('serviceWorker' in navigator) {
 
 // --- التعامل مع حدث التثبيت ---
 let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const installBtn = $("installBtn");
   installBtn.style.display = "block";
-  installBtn.onclick = () => {
-    installBtn.style.display = "none";
+});
+
+installBtn.onclick = () => {
+  if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-  };
-});
+  } else {
+    // تعليمات التثبيت اليدوي في حال عدم تدعيم المتصفح للـ prompt المباشر عبر Blob
+    alert("لتثبيت التطبيق على جهازك:\n1. اضغط على قائمة المتصفح (⋮) في الأعلى.\n2. اختر «الإضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق».");
+  }
+};
+
+// إخفاء زر التثبيت إذا كان التطبيق يعمل بالفعل كتطبيق مستقل (Standalone)
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  installBtn.style.display = "none";
+}
 
 const $=x=>document.getElementById(x);
 const audio=$("audio"),files=$("files"),folderInput=$("folderInput"),playlist=$("playlist");
