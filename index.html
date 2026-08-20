@@ -4,13 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#020617">
-<title>مشغل الصوت - Audio Player</title>
+<title>مشغل الصوت - Chrome</title>
+
+<!-- إعدادات PWA والتثبيت -->
+<link rel="manifest" id="manifestLink">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مشغل الصوت">
+
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:radial-gradient(circle at top,#164e63,#020617 52%);color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh}
-.player{width:100%;max-width:520px;margin:auto;padding:18px 15px 30px;position:relative}
-.lang-switch{position:absolute;top:15px;right:15px;background:#ffffff18;border:0;color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:bold}
-[dir="ltr"] .lang-switch{right:auto;left:15px}
+.player{width:100%;max-width:520px;margin:auto;padding:18px 15px 30px}
 h1{text-align:center;font-size:24px;margin:0}.sub{text-align:center;color:#94a3b8;font-size:12px;margin:7px 0 15px}
 .cover{width:min(72vw,280px);height:min(72vw,280px);margin:0 auto 18px;border-radius:28px;background:linear-gradient(135deg,#06b6d4,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:80px;box-shadow:0 20px 50px #0007}.playing{animation:pulse 2s infinite}@keyframes pulse{50%{transform:scale(1.025)}}
 .info{text-align:center;margin-bottom:16px}.name{font-weight:bold;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.status{color:#94a3b8;font-size:12px;margin-top:7px}
@@ -18,7 +24,7 @@ input[type=range]{width:100%;height:7px;appearance:none;background:#334155;borde
 .times{display:flex;justify-content:space-between;direction:ltr;color:#94a3b8;font-size:11px;margin-top:6px}
 .controls{display:flex;justify-content:center;align-items:center;gap:8px;margin:20px 0}.btn{border:0;color:#fff;background:#ffffff18;border-radius:50%;width:47px;height:47px;font-size:18px;cursor:pointer}.play{width:68px;height:68px;font-size:28px;background:linear-gradient(135deg,#06b6d4,#2563eb)}.track{display:flex;flex-direction:column;align-items:center;justify-content:center}.track small{font-size:8px}
 .volume{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-.actions{display:flex;flex-direction:column;gap:10px}.action{width:100%;min-height:58px;border:0;border-radius:16px;color:#fff;font-family:Tahoma,Arial;font-size:16px;font-weight:bold}.open{background:linear-gradient(135deg,#06b6d4,#2563eb)}.folder{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.actions{display:flex;flex-direction:column;gap:10px}.action{width:100%;min-height:58px;border:0;border-radius:16px;color:#fff;font-family:Tahoma,Arial;font-size:16px;font-weight:bold}.open{background:linear-gradient(135deg,#06b6d4,#2563eb)}.folder{background:linear-gradient(135deg,#7c3aed,#4f46e5)}.install{background:linear-gradient(135deg,#10b981,#059669);display:none;}
 .selection{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 10px}.selection button{border:0;border-radius:11px;padding:10px;color:#fff;background:#ffffff14;font-family:Tahoma;font-size:12px;font-weight:bold}.selection button:last-of-type{background:#991b1b}.selected{font-size:11px;color:#94a3b8;display:flex;align-items:center}
 .list-title{display:flex;justify-content:space-between;margin:8px 0}.count{font-size:12px;color:#94a3b8}.playlist{max-height:300px;overflow:auto}.song{display:flex;align-items:center;gap:8px;min-height:62px;margin-bottom:7px;padding:8px 10px;background:#ffffff0f;border-radius:14px}.song.active{background:#0ea5e933}.check{width:20px;height:20px;accent-color:#22d3ee}.num{width:22px;text-align:center;color:#94a3b8;font-size:12px}.icon{width:42px;height:42px;border-radius:11px;background:#ffffff18;display:flex;align-items:center;justify-content:center}.songname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.empty{text-align:center;color:#64748b;padding:25px;font-size:13px}
 .hidden{position:fixed;left:-10000px;width:1px;height:1px;opacity:0}
@@ -26,26 +32,23 @@ input[type=range]{width:100%;height:7px;appearance:none;background:#334155;borde
 </head>
 <body>
 <div class="player">
-<button class="lang-switch" id="langBtn">English</button>
-<h1 id="t-title">🎵 مشغل الصوت</h1>
-<div class="sub" id="t-sub">متوافق مع Chrome على الجوال</div>
+<h1>🎵 مشغل الصوت</h1>
+<div class="sub">متوافق مع Chrome على الجوال</div>
 <div class="cover" id="cover">🎵</div>
-<div class="info">
-  <div class="name" id="name">لم يتم اختيار ملف</div>
-  <div class="status" id="status">اضغط «فتح ملفات الصوت» واختر عدة ملفات</div>
-</div>
+<div class="info"><div class="name" id="name">لم يتم اختيار ملف</div><div class="status" id="status">اضغط «فتح ملفات الصوت» واختر عدة ملفات</div></div>
 <input id="progress" type="range" min="0" max="100" value="0">
 <div class="times"><span id="cur">00:00</span><span id="dur">00:00</span></div>
 <div class="controls">
 <button class="btn" id="shuffle">🔀</button>
-<button class="btn track" id="prev">⏮<small id="t-prev">السابق</small></button>
+<button class="btn track" id="prev">⏮<small>السابق</small></button>
 <button class="btn play" id="play">▶</button>
-<button class="btn track" id="next">⏭<small id="t-next">التالي</small></button>
+<button class="btn track" id="next">⏭<small>التالي</small></button>
 <button class="btn" id="repeat">🔁</button>
 </div>
 <div class="volume">🔊<input id="vol" type="range" min="0" max="1" step=".01" value="1"></div>
 
 <div class="actions">
+<button class="action install" id="installBtn">📲 تثبيت التطبيق على الشاشة الرئيسية</button>
 <button class="action open" id="open">📂 فتح ملفات الصوت من الجوال</button>
 <button class="action folder" id="folder">📁 فتح مجلد الموسيقى</button>
 </div>
@@ -60,102 +63,107 @@ input[type=range]{width:100%;height:7px;appearance:none;background:#334155;borde
 <span class="selected" id="selected">0 محدد</span>
 </div>
 
-<div class="list-title"><strong id="t-playlist">قائمة التشغيل</strong><span class="count" id="count">0 ملف</span></div>
-<div class="playlist" id="playlist"><div class="empty" id="t-empty">لا توجد ملفات صوتية</div></div>
+<div class="list-title"><strong>قائمة التشغيل</strong><span class="count" id="count">0 ملف</span></div>
+<div class="playlist" id="playlist"><div class="empty">جاري تحميل الملفات المحفوظة...</div></div>
 </div>
 <audio id="audio" preload="metadata"></audio>
 
 <script>
-const translations = {
-  ar: {
-    title: "🎵 مشغل الصوت",
-    sub: "متوافق مع Chrome على الجوال",
-    noFile: "لم يتم اختيار ملف",
-    statusInitial: "اضغط «فتح ملفات الصوت» واختر عدة ملفات",
-    prev: "السابق",
-    next: "التالي",
-    open: "📂 فتح ملفات الصوت من الجوال",
-    folder: "📁 فتح مجلد الموسيقى",
-    all: "☑️ تحديد الكل",
-    none: "⬜ إلغاء التحديد",
-    del: "🗑️ حذف المحدد",
-    selectedSuffix: "محدد",
-    playlist: "قائمة التشغيل",
-    countSuffix: "ملف",
-    empty: "لا توجد ملفات صوتية",
-    ready: "جاهز للتشغيل",
-    playing: "يعمل الآن",
-    addedFiles: count => `تمت إضافة ${count} ملف صوتي`,
-    noNewFiles: "لم تتم إضافة ملفات جديدة",
-    deleteConfirm: "هل تريد حذف المقاطع المحددة من قائمة التشغيل؟",
-    langBtn: "English",
-    dir: "rtl"
-  },
-  en: {
-    title: "🎵 Audio Player",
-    sub: "Compatible with Mobile Chrome",
-    noFile: "No file selected",
-    statusInitial: "Tap 'Open Audio Files' and choose multiple files",
-    prev: "Prev",
-    next: "Next",
-    open: "📂 Open Audio Files",
-    folder: "📁 Open Music Folder",
-    all: "☑️ Select All",
-    none: "⬜ Deselect All",
-    del: "🗑️ Delete Selected",
-    selectedSuffix: "selected",
-    playlist: "Playlist",
-    countSuffix: "files",
-    empty: "No audio files",
-    ready: "Ready to play",
-    playing: "Now Playing",
-    addedFiles: count => `Added ${count} audio file(s)`,
-    noNewFiles: "No new files added",
-    deleteConfirm: "Do you want to delete selected tracks from playlist?",
-    langBtn: "عربي",
-    dir: "ltr"
-  }
+// --- إعدادات Web App Manifest تلقائياً ---
+const manifestData = {
+  name: "مشغل الصوت",
+  short_name: "مشغل الصوت",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#020617",
+  theme_color: "#020617",
+  icons: [{
+    src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2306b6d4'/><text x='50%' y='65%' font-size='60' text-anchor='middle'>🎵</text></svg>",
+    sizes: "192x192 512x512",
+    type: "image/svg+xml"
+  }]
 };
+const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+document.getElementById('manifestLink').href = URL.createObjectURL(manifestBlob);
 
-let currentLang = "ar";
+// --- تسجيل Service Worker لتمكين PWA ---
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => self.clients.claim());
+    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+  `;
+  const swBlob = new Blob([swCode], {type: 'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+}
+
+// --- التعامل مع حدث التثبيت ---
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = $("installBtn");
+  installBtn.style.display = "block";
+  installBtn.onclick = () => {
+    installBtn.style.display = "none";
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  };
+});
+
 const $=x=>document.getElementById(x);
 const audio=$("audio"),files=$("files"),folderInput=$("folderInput"),playlist=$("playlist");
 let songs=[],index=0,chosen=new Set(),random=false,loop=false;
+let db;
 
-function updateLanguage(lang) {
-  currentLang = lang;
-  const t = translations[lang];
-  document.documentElement.lang = lang;
-  document.documentElement.dir = t.dir;
-
-  $("t-title").textContent = t.title;
-  $("t-sub").textContent = t.sub;
-  $("t-prev").textContent = t.prev;
-  $("t-next").textContent = t.next;
-  $("open").textContent = t.open;
-  $("folder").textContent = t.folder;
-  $("all").textContent = t.all;
-  $("none").textContent = t.none;
-  $("del").textContent = t.del;
-  $("t-playlist").textContent = t.playlist;
-  $("langBtn").textContent = t.langBtn;
-
-  if (!songs.length) {
-    $("name").textContent = t.noFile;
-    $("status").textContent = t.statusInitial;
-  } else if (audio.paused && audio.src) {
-    $("status").textContent = t.ready;
-  } else if (!audio.paused) {
-    $("status").textContent = t.playing;
+// تهيئة قاعدة البيانات IndexedDB للحفظ الدائم
+const request = indexedDB.open("AudioPlayerDB", 1);
+request.onupgradeneeded = e => {
+  db = e.target.result;
+  if (!db.objectStoreNames.contains("songs")) {
+    db.createObjectStore("songs", { keyPath: "id" });
   }
-  render();
-}
-
-$("langBtn").onclick = () => {
-  updateLanguage(currentLang === "ar" ? "en" : "ar");
+};
+request.onsuccess = e => {
+  db = e.target.result;
+  loadSavedSongs();
 };
 
-$("open").onclick=()=>{files.value="";files.click()};
+function loadSavedSongs() {
+  const tx = db.transaction("songs", "readonly");
+  const store = tx.objectStore("songs");
+  const req = store.getAll();
+  req.onsuccess = () => {
+    const saved = req.result;
+    if (saved && saved.length) {
+      songs = saved.map(item => ({
+        id: item.id,
+        name: item.name,
+        url: URL.createObjectURL(item.file)
+      }));
+      render();
+      if (!audio.src) load(0);
+      $("status").textContent = `تم تحميل ${songs.length} ملف محفوظ`;
+    } else {
+      render();
+      $("status").textContent = "اضغط «فتح ملفات الصوت» واختر عدة ملفات";
+    }
+  };
+}
+
+function saveSongToDB(id, name, file) {
+  const tx = db.transaction("songs", "readwrite");
+  const store = tx.objectStore("songs");
+  store.put({ id, name, file });
+}
+
+function deleteSongFromDB(id) {
+  const tx = db.transaction("songs", "readwrite");
+  const store = tx.objectStore("songs");
+  store.delete(id);
+}
+
+$("open").onclick=()=>{files.value="";files.click();};
 $("folder").onclick=()=>{folderInput.value="";folderInput.click()};
 
 files.addEventListener("change",()=>addFiles(files.files));
@@ -165,23 +173,24 @@ function addFiles(list){
  if(!list||!list.length)return;
  let added=0;
  Array.from(list).forEach(file=>{
-   if(!file.type.startsWith("audio/") && !/\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(file.name))return;
+   if(!file.type.startsWith("audio/") && !/\.(mp3|wav|m4a,.aac,.ogg,.flac)$/i.test(file.name))return;
    const id=file.name+"_"+file.size+"_"+file.lastModified;
    if(songs.some(s=>s.id===id))return;
-   songs.push({id,name:file.name,url:URL.createObjectURL(file)});
+   
+   saveSongToDB(id, file.name, file);
+   songs.push({id, name:file.name, url:URL.createObjectURL(file)});
    added++;
  });
  render();
  if(songs.length && !audio.src) load(0);
- $("status").textContent=added ? translations[currentLang].addedFiles(added) : translations[currentLang].noNewFiles;
+ $("status").textContent=added?`تمت إضافة ${added} ملف صوتي`:`لم تتم إضافة ملفات جديدة`;
 }
 
 function render(){
- const t = translations[currentLang];
  playlist.innerHTML="";
- $("count").textContent=`${songs.length} ${t.countSuffix}`;
- $("selected").textContent=`${chosen.size} ${t.selectedSuffix}`;
- if(!songs.length){playlist.innerHTML=`<div class="empty">${t.empty}</div>`;return}
+ $("count").textContent=songs.length+" ملف";
+ $("selected").textContent=chosen.size+" محدد";
+ if(!songs.length){playlist.innerHTML='<div class="empty">لا توجد ملفات صوتية</div>';return}
  songs.forEach((s,i)=>{
    const row=document.createElement("div");
    row.className="song "+(i===index?"active":"");
@@ -202,15 +211,15 @@ function load(i){
  if(!songs[i])return;
  index=i;audio.src=songs[i].url;
  $("name").textContent=songs[i].name;
- $("status").textContent=translations[currentLang].ready;
+ $("status").textContent="جاهز للتشغيل";
  $("progress").value=0;render();
- if("mediaSession"in navigator)try{navigator.mediaSession.metadata=new MediaMetadata({title:songs[i].name,artist:translations[currentLang].title})}catch(e){}
+ if("mediaSession"in navigator)try{navigator.mediaSession.metadata=new MediaMetadata({title:songs[i].name,artist:"مشغل الصوت"})}catch(e){}
 }
 function play(){audio.play().catch(()=>{})}
 function pause(){audio.pause()}
 
 $("play").onclick=()=>{if(!songs.length){files.click();return}audio.paused?play():pause()};
-audio.onplay=()=>{$("play").textContent="⏸";$("status").textContent=translations[currentLang].playing;$("cover").classList.add("playing")};
+audio.onplay=()=>{$("play").textContent="⏸";$("status").textContent="يعمل الآن";$("cover").classList.add("playing")};
 audio.onpause=()=>{$("play").textContent="▶";$("cover").classList.remove("playing")};
 
 $("next").onclick=()=>{
@@ -235,16 +244,19 @@ $("all").onclick=()=>{songs.forEach(s=>chosen.add(s.id));render()};
 $("none").onclick=()=>{chosen.clear();render()};
 $("del").onclick=()=>{
  if(!chosen.size)return;
- if(!confirm(translations[currentLang].deleteConfirm))return;
+ if(!confirm("هل تريد حذف المقاطع المحددة من قائمة التشغيل؟"))return;
  songs=songs.filter(s=>{
-   if(chosen.has(s.id)){URL.revokeObjectURL(s.url);return false}
+   if(chosen.has(s.id)){
+     deleteSongFromDB(s.id);
+     URL.revokeObjectURL(s.url);
+     return false;
+   }
    return true;
  });
  chosen.clear();
  if(!songs.length){
    audio.pause();audio.removeAttribute("src");audio.load();index=0;
-   $("name").textContent=translations[currentLang].noFile;
-   $("status").textContent=translations[currentLang].statusInitial;
+   $("name").textContent="لم يتم اختيار ملف";$("status").textContent="اضغط «فتح ملفات الصوت» واختر عدة ملفات";
  }else{
    index=Math.min(index,songs.length-1);load(index);
  }
